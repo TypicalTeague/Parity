@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "parity-api"
+version = "0.1.0"
+description = "Stateless RFQ combo pricing analytics API"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.116",
+  "httpx>=0.28",
+  "numpy>=2.2",
+  "pandas>=2.2",
+  "pydantic>=2.11",
+  "scipy>=1.15",
+  "uvicorn[standard]>=0.34",
+]
+
+[project.optional-dependencies]
+dev = [
+  "hypothesis>=6.130",
+  "mypy>=1.15",
+  "pandas-stubs>=2.2",
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "ruff>=0.11",
+  "types-PyYAML>=6.0",
+  "PyYAML>=6.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/parity"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-config --strict-markers"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["scipy.*", "pandas.*"]
+ignore_missing_imports = true

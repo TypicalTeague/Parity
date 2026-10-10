@@ -21,11 +21,11 @@ files and has no incomplete dependency. Every task includes its intended file pa
 
 **Purpose**: Create the smallest independently runnable backend/frontend workspace and quality-tool baseline.
 
-- [ ] T001 Create the planned `backend/src/parity/`, `backend/tests/`, `frontend/src/`, `frontend/tests/`, `contracts/fixtures/`, and `contracts/` directory structure with package marker files only where Python requires them
-- [ ] T002 [P] Configure Python 3.12, FastAPI, Pydantic, NumPy, Pandas, SciPy, HTTPX, Uvicorn, pytest, Hypothesis, Ruff, and mypy in `backend/pyproject.toml`
-- [ ] T003 [P] Configure Next.js, strict TypeScript, React, `openapi-typescript`, `openapi-fetch`, ESLint, Prettier, Vitest, Testing Library, and Playwright in `frontend/package.json`, `frontend/tsconfig.json`, and the corresponding tool config files
-- [ ] T004 [P] Add repository-level developer commands for backend checks, frontend checks, API generation, and the offline demo in `Makefile` without adding deployment or database infrastructure
-- [ ] T005 Validate `specs/001-price-waterfall/contracts/openapi.yaml` as OpenAPI 3.1, remove any duplicate YAML keys, and preserve the approved request, response, error, and privacy-header semantics
+- [x] T001 Create the planned `backend/src/parity/`, `backend/tests/`, `frontend/src/`, `frontend/tests/`, `contracts/fixtures/`, and `contracts/` directory structure with package marker files only where Python requires them
+- [x] T002 [P] Configure Python 3.12, FastAPI, Pydantic, NumPy, Pandas, SciPy, HTTPX, Uvicorn, pytest, Hypothesis, Ruff, and mypy in `backend/pyproject.toml`
+- [x] T003 [P] Configure Next.js, strict TypeScript, React, `openapi-typescript`, `openapi-fetch`, ESLint, Prettier, Vitest, Testing Library, and Playwright in `frontend/package.json`, `frontend/tsconfig.json`, and the corresponding tool config files
+- [x] T004 [P] Add repository-level developer commands for backend checks, frontend checks, API generation, and the offline demo in `Makefile` without adding deployment or database infrastructure
+- [x] T005 Validate `specs/001-price-waterfall/contracts/openapi.yaml` as OpenAPI 3.1, remove any duplicate YAML keys, and preserve the approved request, response, error, and privacy-header semantics
 
 **Checkpoint**: Both applications install independently, their empty quality gates run, and the design
 contract passes schema validation.
@@ -38,16 +38,16 @@ contract passes schema validation.
 
 **Critical**: No user-story implementation starts until this phase is complete.
 
-- [ ] T006 [P] Define shared enums, decimal-string boundaries, classified-value unions, and provenance schemas with forbidden extra fields in `backend/src/parity/schemas/common.py`
-- [ ] T007 [P] Define condition, contract-leg, combo, quote, market-input-mode, and analysis request schemas with cross-field invariants in `backend/src/parity/schemas/analysis.py`
-- [ ] T008 [P] Define correlation, fee, waterfall, validation-summary, analysis-response, and sanitized error schemas in `backend/src/parity/schemas/results.py`
-- [ ] T009 Add schema-boundary tests for ranges, timezone-aware timestamps, unique legs, complete state tables, decimal money, and forbidden extras in `backend/tests/unit/test_schemas.py`
-- [ ] T010 [P] Create the FastAPI application and health route in `backend/src/parity/api/app.py` and `backend/src/parity/api/routes/health.py`
-- [ ] T011 [P] Implement allowlisted metadata-only logging, sanitized exception mapping, and no-store response headers in `backend/src/parity/api/privacy.py` and `backend/src/parity/api/errors.py`
+- [x] T006 [P] Define shared enums, decimal-string boundaries, classified-value unions, and provenance schemas with forbidden extra fields in `backend/src/parity/schemas/common.py`
+- [x] T007 [P] Define condition, contract-leg, combo, quote, market-input-mode, and analysis request schemas with cross-field invariants in `backend/src/parity/schemas/analysis.py`
+- [x] T008 [P] Define correlation, fee, waterfall, validation-summary, analysis-response, and sanitized error schemas in `backend/src/parity/schemas/results.py`
+- [x] T009 Add schema-boundary tests for ranges, timezone-aware timestamps, unique legs, complete state tables, decimal money, and forbidden extras in `backend/tests/unit/test_schemas.py`
+- [x] T010 [P] Create the FastAPI application and health route in `backend/src/parity/api/app.py` and `backend/src/parity/api/routes/health.py`
+- [x] T011 [P] Implement allowlisted metadata-only logging, sanitized exception mapping, and no-store response headers in `backend/src/parity/api/privacy.py` and `backend/src/parity/api/errors.py`
 - [ ] T012 Add sentinel tests proving request bodies, quote values, results, and personal identifiers are absent from success and error logs in `backend/tests/integration/test_logging_privacy.py`
-- [ ] T013 Implement deterministic OpenAPI export and drift checking in `backend/src/parity/tools/export_openapi.py`, generating `contracts/openapi.json` from FastAPI
-- [ ] T014 Generate strict frontend API types in `frontend/src/lib/api/generated.ts` and add the reproducible generation/drift command to `frontend/package.json`
-- [ ] T015 Implement the no-credentials typed HTTP client with explicit success/error unions in `frontend/src/lib/api/client.ts`
+- [x] T013 Implement deterministic OpenAPI export and drift checking in `backend/src/parity/tools/export_openapi.py`, generating `contracts/openapi.json` from FastAPI
+- [x] T014 Generate strict frontend API types in `frontend/src/lib/api/generated.ts` and add the reproducible generation/drift command to `frontend/package.json`
+- [x] T015 Implement the no-credentials typed HTTP client with explicit success/error unions in `frontend/src/lib/api/client.ts`
 - [ ] T016 Add backend/frontend contract-shape tests in `backend/tests/contract/test_openapi.py` and `frontend/tests/contract/api-types.test.ts`
 
 **Checkpoint**: The API schema is executable, generated frontend types match it, errors are sanitized,
@@ -66,9 +66,9 @@ with correct signs, units, classifications, and unavailable behavior.
 
 ### Tests for User Story 1
 
-- [ ] T017 [P] [US1] Add hand-enumerated tests for all-legs-win, OR, XOR, and explicit state-table settlement payoffs in `backend/tests/unit/test_settlement.py`
-- [ ] T018 [P] [US1] Add correlation tests for identity/independence, positive and negative dependence direction, zero/one marginals, invalid matrices, bounded Higham repair, and state-probability reconciliation in `backend/tests/unit/test_correlation.py`
-- [ ] T019 [P] [US1] Add hand-worked buy/sell, quantity, rounding, verified/estimated/unavailable fee, and net-value tests in `backend/tests/unit/test_pricing_and_fees.py`
+- [x] T017 [P] [US1] Add hand-enumerated tests for all-legs-win, OR, XOR, and explicit state-table settlement payoffs in `backend/tests/unit/test_settlement.py`
+- [x] T018 [P] [US1] Add correlation tests for identity/independence, positive and negative dependence direction, zero/one marginals, invalid matrices, bounded Higham repair, and state-probability reconciliation in `backend/tests/unit/test_correlation.py`
+- [x] T019 [P] [US1] Add hand-worked buy/sell, quantity, rounding, verified/estimated/unavailable fee, and net-value tests in `backend/tests/unit/test_pricing_and_fees.py`
 - [ ] T020 [P] [US1] Add `POST /api/v1/analyses` contract tests for 200, 400, 422, and fee-unavailable responses in `backend/tests/contract/test_analyses.py`
 - [ ] T021 [P] [US1] Add component tests for input validation, all waterfall stages, buy/sell sign labels, unavailable fees, and estimate/no-guarantee copy in `frontend/tests/components/analysis-flow.test.tsx`
 
