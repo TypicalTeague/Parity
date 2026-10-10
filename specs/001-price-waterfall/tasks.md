@@ -69,7 +69,7 @@ with correct signs, units, classifications, and unavailable behavior.
 - [x] T017 [P] [US1] Add hand-enumerated tests for all-legs-win, OR, XOR, and explicit state-table settlement payoffs in `backend/tests/unit/test_settlement.py`
 - [x] T018 [P] [US1] Add correlation tests for identity/independence, positive and negative dependence direction, zero/one marginals, invalid matrices, bounded Higham repair, and state-probability reconciliation in `backend/tests/unit/test_correlation.py`
 - [x] T019 [P] [US1] Add hand-worked buy/sell, quantity, rounding, verified/estimated/unavailable fee, and net-value tests in `backend/tests/unit/test_pricing_and_fees.py`
-- [ ] T020 [P] [US1] Add `POST /api/v1/analyses` contract tests for 200, 400, 422, and fee-unavailable responses in `backend/tests/contract/test_analyses.py`
+- [x] T020 [P] [US1] Add `POST /api/v1/analyses` contract tests for 200, 400, 422, and fee-unavailable responses in `backend/tests/contract/test_analyses.py`
 - [ ] T021 [P] [US1] Add component tests for input validation, all waterfall stages, buy/sell sign labels, unavailable fees, and estimate/no-guarantee copy in `frontend/tests/components/analysis-flow.test.tsx`
 
 ### Implementation for User Story 1
@@ -78,8 +78,8 @@ with correct signs, units, classifications, and unavailable behavior.
 - [ ] T023 [P] [US1] Implement tetrachoric pair fitting, bounded Higham/Dykstra correlation repair, and deterministic SciPy rectangle probabilities in `backend/src/parity/domain/correlation.py`
 - [ ] T024 [P] [US1] Implement effective-dated fee evidence resolution and decimal-safe formula/rounding boundaries in `backend/src/parity/domain/fees.py`
 - [ ] T025 [US1] Implement independence expectation, correlation-adjusted expectation, user-side quote difference, quantity scaling, and net expected value in `backend/src/parity/domain/pricing.py` using T022–T024
-- [ ] T026 [US1] Implement request-local waterfall orchestration with explicit unsupported/unavailable states in `backend/src/parity/services/analysis.py`
-- [ ] T027 [US1] Expose the stateless analysis endpoint without request IDs or persistence in `backend/src/parity/api/routes/analyses.py` and register it in `backend/src/parity/api/app.py`
+- [x] T026 [US1] Implement request-local waterfall orchestration with explicit unsupported/unavailable states in `backend/src/parity/services/analysis.py`
+- [x] T027 [US1] Expose the stateless analysis endpoint without request IDs or persistence in `backend/src/parity/api/routes/analyses.py` and register it in `backend/src/parity/api/app.py`
 - [ ] T028 [P] [US1] Implement the typed combo/quote input form and client-side shape feedback in `frontend/src/components/AnalysisForm.tsx`
 - [ ] T029 [P] [US1] Implement the waterfall, fee-state, unit, rounding, and user-side quote display in `frontend/src/components/PriceWaterfall.tsx`
 - [ ] T030 [US1] Connect the analysis page to the typed client and render sanitized API failures in `frontend/src/app/page.tsx`
@@ -134,10 +134,10 @@ responses, visible simulated labels, no repository writes, and no browser restor
 
 ### Implementation for User Story 3
 
-- [ ] T045 [P] [US3] Create safe public canonical inputs, fixed timestamps, expected outputs, and provenance in `contracts/fixtures/canonical-v1.request.json`, `contracts/fixtures/canonical-v1.response.json`, and `backend/src/parity/fixtures/canonical-v1.json`
+- [x] T045 [P] [US3] Create safe public canonical inputs, fixed timestamps, expected outputs, and provenance in `contracts/fixtures/canonical-v1.request.json`, `contracts/fixtures/canonical-v1.response.json`, and `backend/src/parity/fixtures/canonical-v1.json`
 - [ ] T046 [P] [US3] Create a live-shaped response fixture containing no credentials, private data, or user-submitted values in `contracts/fixtures/live-shaped-v1.response.json`
 - [ ] T047 [US3] Implement versioned fixture loading, hash verification, and explicit demo-mode orchestration in `backend/src/parity/services/demo.py` and `backend/src/parity/services/analysis.py`
-- [ ] T048 [US3] Implement sanitized live-failure responses that offer a new explicit demo request in `backend/src/parity/api/routes/analyses.py`
+- [x] T048 [US3] Implement sanitized live-failure responses that offer a new explicit demo request in `backend/src/parity/api/routes/analyses.py`
 - [ ] T049 [P] [US3] Add the explicit Live/Deterministic Demo selector and fallback action in `frontend/src/components/DataModeSelector.tsx`
 - [ ] T050 [US3] Keep analysis state only in React memory and clear it on reload/page restoration in `frontend/src/app/page.tsx`
 

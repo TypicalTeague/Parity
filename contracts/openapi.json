@@ -1,6 +1,725 @@
 {
   "components": {
     "schemas": {
+      "AnalysisRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "combo": {
+            "$ref": "#/components/schemas/ComboDefinition"
+          },
+          "market_inputs": {
+            "discriminator": {
+              "mapping": {
+                "deterministic_demo": "#/components/schemas/DeterministicDemoMode",
+                "live": "#/components/schemas/LiveMode"
+              },
+              "propertyName": "mode"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LiveMode"
+              },
+              {
+                "$ref": "#/components/schemas/DeterministicDemoMode"
+              }
+            ],
+            "title": "Market Inputs"
+          },
+          "quote": {
+            "$ref": "#/components/schemas/Quote"
+          }
+        },
+        "required": [
+          "combo",
+          "quote",
+          "market_inputs"
+        ],
+        "title": "AnalysisRequest",
+        "type": "object"
+      },
+      "AnalysisResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "configuration_version": {
+            "minLength": 1,
+            "title": "Configuration Version",
+            "type": "string"
+          },
+          "correlation": {
+            "$ref": "#/components/schemas/CorrelationAdjustment"
+          },
+          "disclosures": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Disclosures",
+            "type": "array"
+          },
+          "fallback_used": {
+            "title": "Fallback Used",
+            "type": "boolean"
+          },
+          "model_version": {
+            "minLength": 1,
+            "title": "Model Version",
+            "type": "string"
+          },
+          "observation_time": {
+            "format": "date-time",
+            "title": "Observation Time",
+            "type": "string"
+          },
+          "provenance": {
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "validation_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "waterfall": {
+            "$ref": "#/components/schemas/Waterfall"
+          }
+        },
+        "required": [
+          "waterfall",
+          "correlation",
+          "provenance",
+          "observation_time",
+          "model_version",
+          "configuration_version",
+          "fallback_used",
+          "disclosures"
+        ],
+        "title": "AnalysisResponse",
+        "type": "object"
+      },
+      "AvailableValue": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "const": true,
+            "default": true,
+            "title": "Available",
+            "type": "boolean"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/Classification"
+          },
+          "precision": {
+            "$ref": "#/components/schemas/Precision"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "value",
+          "unit",
+          "classification",
+          "precision"
+        ],
+        "title": "AvailableValue",
+        "type": "object"
+      },
+      "Classification": {
+        "enum": [
+          "observed",
+          "model_estimated",
+          "simulated",
+          "user_provided",
+          "adjusted",
+          "unavailable"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "ComboDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "combo_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Combo Id"
+          },
+          "currency": {
+            "const": "USD",
+            "title": "Currency",
+            "type": "string"
+          },
+          "legs": {
+            "items": {
+              "$ref": "#/components/schemas/ContractLeg"
+            },
+            "maxItems": 4,
+            "minItems": 2,
+            "title": "Legs",
+            "type": "array"
+          },
+          "payoff_rule": {
+            "enum": [
+              "all_legs_win",
+              "any_leg_wins",
+              "exactly_one_wins",
+              "state_table"
+            ],
+            "title": "Payoff Rule",
+            "type": "string"
+          },
+          "payout_unit": {
+            "const": "usd_per_contract",
+            "title": "Payout Unit",
+            "type": "string"
+          },
+          "state_payoffs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StatePayoff"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Payoffs"
+          }
+        },
+        "required": [
+          "legs",
+          "payoff_rule",
+          "currency",
+          "payout_unit"
+        ],
+        "title": "ComboDefinition",
+        "type": "object"
+      },
+      "ContractLeg": {
+        "additionalProperties": false,
+        "properties": {
+          "condition": {
+            "discriminator": {
+              "mapping": {
+                "named_event": "#/components/schemas/EventCondition",
+                "threshold": "#/components/schemas/ThresholdCondition"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ThresholdCondition"
+              },
+              {
+                "$ref": "#/components/schemas/EventCondition"
+              }
+            ],
+            "title": "Condition"
+          },
+          "leg_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Leg Id",
+            "type": "string"
+          },
+          "market_ticker": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Market Ticker",
+            "type": "string"
+          },
+          "payoff_contribution": {
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+            "title": "Payoff Contribution",
+            "type": "string"
+          },
+          "position": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Position",
+            "type": "string"
+          },
+          "probability": {
+            "$ref": "#/components/schemas/ProbabilityInput"
+          },
+          "settlement_rule": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Settlement Rule",
+            "type": "string"
+          },
+          "underlying_outcome": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Underlying Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "leg_id",
+          "market_ticker",
+          "underlying_outcome",
+          "position",
+          "condition",
+          "settlement_rule",
+          "payoff_contribution",
+          "probability"
+        ],
+        "title": "ContractLeg",
+        "type": "object"
+      },
+      "CorrelationAdjustment": {
+        "additionalProperties": false,
+        "properties": {
+          "historical_window": {
+            "$ref": "#/components/schemas/HistoricalWindow"
+          },
+          "integration": {
+            "$ref": "#/components/schemas/IntegrationMetadata"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "matrix_adjustment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatrixAdjustment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "missing_data_treatment": {
+            "title": "Missing Data Treatment",
+            "type": "string"
+          },
+          "observation_count": {
+            "minimum": 0.0,
+            "title": "Observation Count",
+            "type": "integer"
+          },
+          "original_matrix": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Matrix"
+          },
+          "outcome_transformations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Outcome Transformations",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "coherent",
+              "adjusted",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "used_matrix": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Used Matrix"
+          }
+        },
+        "required": [
+          "status",
+          "original_matrix",
+          "used_matrix",
+          "historical_window",
+          "observation_count",
+          "missing_data_treatment",
+          "outcome_transformations",
+          "integration"
+        ],
+        "title": "CorrelationAdjustment",
+        "type": "object"
+      },
+      "DeterministicDemoMode": {
+        "additionalProperties": false,
+        "properties": {
+          "fixture_version": {
+            "pattern": "^[A-Za-z0-9._-]+$",
+            "title": "Fixture Version",
+            "type": "string"
+          },
+          "mode": {
+            "const": "deterministic_demo",
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "fixture_version"
+        ],
+        "title": "DeterministicDemoMode",
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "VALIDATION_FAILED",
+              "UNSUPPORTED_COMBO",
+              "DEPENDENCE_UNUSABLE",
+              "LIVE_DATA_UNAVAILABLE",
+              "INTERNAL_ERROR"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorField"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "message": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
+      "ErrorField": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "path": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Path",
+            "type": "array"
+          }
+        },
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "title": "ErrorField",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "EventCondition": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "named_event",
+            "title": "Kind",
+            "type": "string"
+          },
+          "outcome_code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Outcome Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "outcome_code"
+        ],
+        "title": "EventCondition",
+        "type": "object"
+      },
+      "FeeAssessment": {
+        "additionalProperties": false,
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "balance_rounding_fee": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "false": "#/components/schemas/UnavailableValue",
+                    "true": "#/components/schemas/AvailableValue"
+                  },
+                  "propertyName": "available"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AvailableValue"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UnavailableValue"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Balance Rounding Fee"
+          },
+          "fee_role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "maker",
+                  "taker"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee Role"
+          },
+          "formula_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formula Version"
+          },
+          "model_trade_fee": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "false": "#/components/schemas/UnavailableValue",
+                    "true": "#/components/schemas/AvailableValue"
+                  },
+                  "propertyName": "available"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AvailableValue"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UnavailableValue"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Trade Fee"
+          },
+          "multiplier": {
+            "anyOf": [
+              {
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Multiplier"
+          },
+          "policy_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Source"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rebate": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "false": "#/components/schemas/UnavailableValue",
+                    "true": "#/components/schemas/AvailableValue"
+                  },
+                  "propertyName": "available"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AvailableValue"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UnavailableValue"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rebate"
+          },
+          "status": {
+            "enum": [
+              "verified",
+              "estimated",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "total_fee": {
+            "discriminator": {
+              "mapping": {
+                "false": "#/components/schemas/UnavailableValue",
+                "true": "#/components/schemas/AvailableValue"
+              },
+              "propertyName": "available"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AvailableValue"
+              },
+              {
+                "$ref": "#/components/schemas/UnavailableValue"
+              }
+            ],
+            "title": "Total Fee"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "required": [
+          "status",
+          "total_fee"
+        ],
+        "title": "FeeAssessment",
+        "type": "object"
+      },
       "HealthResponse": {
         "additionalProperties": false,
         "properties": {
@@ -13,6 +732,683 @@
         },
         "title": "HealthResponse",
         "type": "object"
+      },
+      "HistoricalWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "title": "End",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "HistoricalWindow",
+        "type": "object"
+      },
+      "IntegrationMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "abseps": {
+            "exclusiveMinimum": 0.0,
+            "title": "Abseps",
+            "type": "number"
+          },
+          "maximum_correction": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maximum Correction"
+          },
+          "maxpts": {
+            "minimum": 1.0,
+            "title": "Maxpts",
+            "type": "integer"
+          },
+          "method": {
+            "const": "scipy_mvn_rectangle",
+            "title": "Method",
+            "type": "string"
+          },
+          "probability_sum_residual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probability Sum Residual"
+          },
+          "releps": {
+            "exclusiveMinimum": 0.0,
+            "title": "Releps",
+            "type": "number"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "state_order": {
+            "const": "lexicographic",
+            "title": "State Order",
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "seed",
+          "state_order",
+          "maxpts",
+          "abseps",
+          "releps"
+        ],
+        "title": "IntegrationMetadata",
+        "type": "object"
+      },
+      "LiveMode": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "const": "live",
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "LiveMode",
+        "type": "object"
+      },
+      "MatrixAdjustment": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptance_threshold": {
+            "minimum": 0.0,
+            "title": "Acceptance Threshold",
+            "type": "number"
+          },
+          "converged": {
+            "title": "Converged",
+            "type": "boolean"
+          },
+          "frobenius_norm": {
+            "minimum": 0.0,
+            "title": "Frobenius Norm",
+            "type": "number"
+          },
+          "iterations": {
+            "minimum": 1.0,
+            "title": "Iterations",
+            "type": "integer"
+          },
+          "max_entry_change": {
+            "minimum": 0.0,
+            "title": "Max Entry Change",
+            "type": "number"
+          },
+          "method": {
+            "const": "higham_dykstra",
+            "title": "Method",
+            "type": "string"
+          },
+          "original_min_eigenvalue": {
+            "title": "Original Min Eigenvalue",
+            "type": "number"
+          },
+          "repaired_min_eigenvalue": {
+            "title": "Repaired Min Eigenvalue",
+            "type": "number"
+          }
+        },
+        "required": [
+          "method",
+          "iterations",
+          "converged",
+          "original_min_eigenvalue",
+          "repaired_min_eigenvalue",
+          "frobenius_norm",
+          "max_entry_change",
+          "acceptance_threshold"
+        ],
+        "title": "MatrixAdjustment",
+        "type": "object"
+      },
+      "Precision": {
+        "additionalProperties": false,
+        "properties": {
+          "decimal_places": {
+            "maximum": 12.0,
+            "minimum": 0.0,
+            "title": "Decimal Places",
+            "type": "integer"
+          },
+          "rounding_mode": {
+            "enum": [
+              "half_even",
+              "ceiling",
+              "exchange_rule"
+            ],
+            "title": "Rounding Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decimal_places",
+          "rounding_mode"
+        ],
+        "title": "Precision",
+        "type": "object"
+      },
+      "ProbabilityInput": {
+        "additionalProperties": false,
+        "properties": {
+          "classification": {
+            "enum": [
+              "observed",
+              "model_estimated",
+              "simulated",
+              "user_provided"
+            ],
+            "title": "Classification",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "value": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "value",
+          "classification",
+          "observed_at",
+          "source"
+        ],
+        "title": "ProbabilityInput",
+        "type": "object"
+      },
+      "Quote": {
+        "additionalProperties": false,
+        "properties": {
+          "intended_side": {
+            "enum": [
+              "buy",
+              "sell"
+            ],
+            "title": "Intended Side",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "participant_role": {
+            "enum": [
+              "requester",
+              "quoter",
+              "unknown"
+            ],
+            "title": "Participant Role",
+            "type": "string"
+          },
+          "price_per_contract": {
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+            "title": "Price Per Contract",
+            "type": "string"
+          },
+          "quantity": {
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          }
+        },
+        "required": [
+          "intended_side",
+          "participant_role",
+          "price_per_contract",
+          "quantity",
+          "observed_at",
+          "source"
+        ],
+        "title": "Quote",
+        "type": "object"
+      },
+      "Source": {
+        "additionalProperties": false,
+        "properties": {
+          "classification": {
+            "$ref": "#/components/schemas/Classification"
+          },
+          "content_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Sha256"
+          },
+          "effective_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective At"
+          },
+          "fixture_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Version"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed At"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "source_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "source_name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Source Name",
+            "type": "string"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "required": [
+          "source_id",
+          "source_name",
+          "source_kind",
+          "classification"
+        ],
+        "title": "Source",
+        "type": "object"
+      },
+      "SourceKind": {
+        "enum": [
+          "user_input",
+          "public_api",
+          "official_document",
+          "deterministic_fixture",
+          "model"
+        ],
+        "title": "SourceKind",
+        "type": "string"
+      },
+      "StatePayoff": {
+        "additionalProperties": false,
+        "properties": {
+          "payoff": {
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+            "title": "Payoff",
+            "type": "string"
+          },
+          "state": {
+            "items": {
+              "enum": [
+                0,
+                1
+              ],
+              "type": "integer"
+            },
+            "maxItems": 4,
+            "minItems": 2,
+            "title": "State",
+            "type": "array"
+          }
+        },
+        "required": [
+          "state",
+          "payoff"
+        ],
+        "title": "StatePayoff",
+        "type": "object"
+      },
+      "ThresholdCondition": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "threshold",
+            "title": "Kind",
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "above",
+              "at_or_above",
+              "below",
+              "at_or_below"
+            ],
+            "title": "Operator",
+            "type": "string"
+          },
+          "threshold": {
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+            "title": "Threshold",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "operator",
+          "threshold",
+          "unit"
+        ],
+        "title": "ThresholdCondition",
+        "type": "object"
+      },
+      "UnavailableValue": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "const": false,
+            "default": false,
+            "title": "Available",
+            "type": "boolean"
+          },
+          "classification": {
+            "const": "unavailable",
+            "default": "unavailable",
+            "title": "Classification",
+            "type": "string"
+          },
+          "reason_code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit"
+          }
+        },
+        "required": [
+          "unit",
+          "reason_code"
+        ],
+        "title": "UnavailableValue",
+        "type": "object"
+      },
+      "Unit": {
+        "enum": [
+          "probability",
+          "usd_per_contract",
+          "usd_total"
+        ],
+        "title": "Unit",
+        "type": "string"
+      },
+      "ValidationSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "eligible_count": {
+            "minimum": 0.0,
+            "title": "Eligible Count",
+            "type": "integer"
+          },
+          "evaluation_window": {
+            "title": "Evaluation Window",
+            "type": "string"
+          },
+          "excluded_count": {
+            "minimum": 0.0,
+            "title": "Excluded Count",
+            "type": "integer"
+          },
+          "fitting_window": {
+            "title": "Fitting Window",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Metrics",
+            "type": "object"
+          },
+          "no_guarantee_disclosure": {
+            "minLength": 1,
+            "title": "No Guarantee Disclosure",
+            "type": "string"
+          },
+          "prediction_count": {
+            "minimum": 0.0,
+            "title": "Prediction Count",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "available",
+              "insufficient_evidence"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "fitting_window",
+          "evaluation_window",
+          "eligible_count",
+          "excluded_count",
+          "prediction_count",
+          "metrics",
+          "no_guarantee_disclosure"
+        ],
+        "title": "ValidationSummary",
+        "type": "object"
+      },
+      "Waterfall": {
+        "additionalProperties": false,
+        "properties": {
+          "correlation_adjustment": {
+            "discriminator": {
+              "mapping": {
+                "false": "#/components/schemas/UnavailableValue",
+                "true": "#/components/schemas/AvailableValue"
+              },
+              "propertyName": "available"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AvailableValue"
+              },
+              {
+                "$ref": "#/components/schemas/UnavailableValue"
+              }
+            ],
+            "title": "Correlation Adjustment"
+          },
+          "fees": {
+            "$ref": "#/components/schemas/FeeAssessment"
+          },
+          "independence_baseline": {
+            "discriminator": {
+              "mapping": {
+                "false": "#/components/schemas/UnavailableValue",
+                "true": "#/components/schemas/AvailableValue"
+              },
+              "propertyName": "available"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AvailableValue"
+              },
+              {
+                "$ref": "#/components/schemas/UnavailableValue"
+              }
+            ],
+            "title": "Independence Baseline"
+          },
+          "model_fair_value": {
+            "discriminator": {
+              "mapping": {
+                "false": "#/components/schemas/UnavailableValue",
+                "true": "#/components/schemas/AvailableValue"
+              },
+              "propertyName": "available"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AvailableValue"
+              },
+              {
+                "$ref": "#/components/schemas/UnavailableValue"
+              }
+            ],
+            "title": "Model Fair Value"
+          },
+          "net_expected_value": {
+            "discriminator": {
+              "mapping": {
+                "false": "#/components/schemas/UnavailableValue",
+                "true": "#/components/schemas/AvailableValue"
+              },
+              "propertyName": "available"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AvailableValue"
+              },
+              {
+                "$ref": "#/components/schemas/UnavailableValue"
+              }
+            ],
+            "title": "Net Expected Value"
+          },
+          "quote_difference": {
+            "discriminator": {
+              "mapping": {
+                "false": "#/components/schemas/UnavailableValue",
+                "true": "#/components/schemas/AvailableValue"
+              },
+              "propertyName": "available"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AvailableValue"
+              },
+              {
+                "$ref": "#/components/schemas/UnavailableValue"
+              }
+            ],
+            "title": "Quote Difference"
+          }
+        },
+        "required": [
+          "independence_baseline",
+          "correlation_adjustment",
+          "model_fair_value",
+          "quote_difference",
+          "fees",
+          "net_expected_value"
+        ],
+        "title": "Waterfall",
+        "type": "object"
       }
     }
   },
@@ -23,6 +1419,64 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/analyses": {
+      "post": {
+        "operationId": "analyzeCombo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Analyze Combo"
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "getHealth",

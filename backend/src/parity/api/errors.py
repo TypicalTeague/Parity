@@ -30,6 +30,7 @@ class DomainError(Exception):
     message: str
     status_code: int = 400
     fields: list[ErrorField] = field(default_factory=list)
+    fallback: dict[str, str | bool] | None = None
 
 
 def _response(status_code: int, detail: ErrorDetail) -> JSONResponse:
@@ -64,7 +65,12 @@ def install_error_handlers(app: FastAPI) -> None:
     async def domain_error(_: Request, exc: DomainError) -> JSONResponse:
         return _response(
             exc.status_code,
-            ErrorDetail(code=exc.code, message=exc.message, fields=exc.fields),
+            ErrorDetail(
+                code=exc.code,
+                message=exc.message,
+                fields=exc.fields,
+                fallback=exc.fallback,
+            ),
         )
 
     @app.exception_handler(Exception)

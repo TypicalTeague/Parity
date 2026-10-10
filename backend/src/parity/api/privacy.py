@@ -30,6 +30,6 @@ def install_privacy_middleware(app: FastAPI) -> None:
             response.status_code,
             round((perf_counter() - started) * 1000),
         )
-        if route_path == "/api/v1/analyses":
+        if request.url.path == "/api/v1/analyses":
             response.headers.update(NO_STORE_HEADERS)
         return response
