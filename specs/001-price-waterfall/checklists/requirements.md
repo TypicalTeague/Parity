@@ -31,9 +31,11 @@
 
 ## Notes
 
-- Validation passed on the first review iteration.
+- Validation passed after the approved Zero Data amendment and one review iteration.
 - The Gaussian-copula requirement, two-to-four-leg limit, and historical time-ordering rules are
   intentional product constraints supplied or derived from the approved project scope, not
   implementation-plan decisions.
 - The specification is ready for stakeholder review. Planning remains blocked until that review is
   approved.
+- Zero Data requirements are expressed as testable product behavior while preserving the existing
+  pricing scope and application-level versus provider-level privacy distinction.

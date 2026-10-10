@@ -37,6 +37,12 @@ expected value are shown with correct signs, units, and labels.
 4. **Given** a market quote above or below the model estimate, **When** the comparison is displayed,
    **Then** the difference is described from the trader's selected side and is not characterized as
    guaranteed profit.
+5. **Given** a first-time visitor, **When** they submit a supported analysis, **Then** they receive
+   the complete result without creating an account or providing a personal identifier.
+6. **Given** a completed analysis, **When** the page is reloaded or opened in a new browser session,
+   **Then** Parity cannot retrieve a persistently stored history of that analysis.
+7. **Given** a completed analysis, **When** application-controlled logs are inspected, **Then** its
+   submitted financial inputs and response values do not appear in those logs.
 
 ---
 
@@ -62,6 +68,10 @@ interpretation, fee status, and any fallback or mathematical adjustment.
    and fee-adjusted net value are marked unavailable or estimated with the assumption identified.
 4. **Given** any completed analysis, **When** the trader reviews it, **Then** model fair value is
    clearly labeled as an estimate rather than an objectively correct probability.
+5. **Given** Parity's privacy disclosure, **When** the trader reviews it, **Then** it distinguishes
+   application-controlled behavior from hosting-provider or network-level retention.
+6. **Given** cached public market data, **When** its provenance is displayed, **Then** it is clearly
+   distinguished from user-submitted analysis data.
 
 ---
 
@@ -127,6 +137,12 @@ disclosure.
 - Live data becomes unavailable partway through an analysis or contains a mixture of observation
   times.
 - Rounding could reverse the displayed sign of a very small premium or net expected value.
+- A user attempts to place financial inputs or personal information in a URL or another field that
+  may be retained outside the active analysis.
+- A browser attempts to restore a completed analysis after the active page is closed or reloaded.
+- Logging, monitoring, or error-reporting behavior attempts to capture an analysis payload or result.
+- A public market-data cache is accidentally keyed by a user, device, session, or prior analysis.
+- A hosting or network provider retains IP addresses or request metadata that Parity cannot control.
 
 ## Requirements *(mandatory)*
 
@@ -180,6 +196,27 @@ disclosure.
   produce identical values, rounding, classifications, and disclosures.
 - **FR-025**: The product MUST remain analytics-only and MUST NOT place, route, or represent completion
   of a real-money trade.
+- **FR-026**: Core analysis MUST be available without an account, login, user profile, or personal
+  identifier.
+- **FR-027**: Analysis requests MUST be stateless and MUST NOT rely on persistent user sessions.
+- **FR-028**: User-submitted combo definitions, quotes, quantities, and analysis results MUST NOT be
+  persistently stored.
+- **FR-029**: The product MUST NOT provide persistent user-associated calculation or conversation
+  history.
+- **FR-030**: The product MUST NOT use tracking cookies, behavioral analytics, or persistent browser
+  storage for analysis inputs or results.
+- **FR-031**: User financial inputs MUST NOT appear in URLs, analytics events, application logs, or
+  error reports.
+- **FR-032**: The product MUST NOT send personal information or complete user analysis payloads to
+  external AI, advertising, analytics, or error-reporting services.
+- **FR-033**: Public financial data MAY be cached only independently of user identity, session,
+  device, and behavior.
+- **FR-034**: The product MUST prevent analysis inputs and results from being retained in browser or
+  shared intermediary caches after the active analysis ends.
+- **FR-035**: Error responses MUST describe validation failures without echoing complete submitted
+  analysis inputs.
+- **FR-036**: The product MUST disclose provider-controlled logging or retention that the application
+  cannot guarantee or disable.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -199,6 +236,8 @@ disclosure.
   value; units; rounding; provenance; model version; and disclosures.
 - **Validation Summary**: Time-ordered historical evaluation metadata and error measures, including
   sample sufficiency and limitations.
+- **Privacy Disclosure**: A plain-language description of application-controlled non-retention,
+  permitted public-data caching, external services, and provider-controlled retention limits.
 
 ## Success Criteria *(mandatory)*
 
@@ -223,6 +262,16 @@ disclosure.
 - **SC-009**: Acceptance review finds zero instances where an estimate is described as objectively
   correct, a quote difference is described as guaranteed profit, or an unverified fee is presented
   as authoritative.
+- **SC-010**: Every canonical analysis can be completed without an account, personal identifier,
+  tracking cookie, or persistent browser state.
+- **SC-011**: After 10 representative analyses, application-controlled persistent storage contains
+  zero user inputs, quotes, results, or user-associated histories.
+- **SC-012**: Browser inspection finds zero tracking requests, tracking cookies, or persistently
+  stored analysis values.
+- **SC-013**: Logging tests using recognizable sentinel inputs find zero financial inputs, personal
+  identifiers, or response values in application-controlled logs.
+- **SC-014**: Before the demo, every external service is documented with the data it receives, its
+  retention uncertainty, and whether it is essential.
 
 ## Assumptions
 
@@ -239,6 +288,12 @@ disclosure.
 - Public live market data is best-effort and may be delayed, incomplete, or unavailable.
 - The canonical deterministic fixture contains no user, account, credential, or non-public market
   information and is safe to commit to the public repository.
+- Public market-data caches may persist independently of an analysis, but contain no user identities,
+  user-submitted quotes, calculation results, or behavioral profiles.
+- Hosting or network providers may retain IP addresses or request metadata outside Parity's control;
+  those dependencies are reviewed and disclosed rather than covered by an absolute zero-data claim.
+- External AI, behavioral analytics, advertising, session replay, and hosted error-reporting services
+  are not required for the core experience.
 - Historical validation is an explanatory credibility feature, not a claim of profitability or a
   substitute for independent trading judgment.
 - No real-money trade execution, account connection, custody, personalized advice, or production
