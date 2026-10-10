@@ -1,0 +1,17 @@
+{
+  "fixture_version": "canonical-v1",
+  "correlation_matrix": [[1.0, 0.35], [0.35, 1.0]],
+  "historical_window": {
+    "start": "2024-01-01T00:00:00Z",
+    "end": "2025-12-31T23:59:59Z"
+  },
+  "observation_count": 504,
+  "missing_data_treatment": "complete rows in the deterministic public fixture",
+  "outcome_transformations": [
+    "leg-a: named event mapped to settlement success",
+    "leg-b: named event mapped to settlement success"
+  ],
+  "seed": 20261010,
+  "model_version": "gaussian-copula-v0.1.0",
+  "configuration_version": "canonical-v1"
+}

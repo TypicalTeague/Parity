@@ -1,0 +1,107 @@
+{
+  "configuration_version": "canonical-v1",
+  "correlation": {
+    "historical_window": { "end": "2025-12-31T23:59:59Z", "start": "2024-01-01T00:00:00Z" },
+    "integration": {
+      "abseps": 1e-08,
+      "maximum_correction": 0.0,
+      "maxpts": 1000000,
+      "method": "scipy_mvn_rectangle",
+      "probability_sum_residual": 0.0,
+      "releps": 1e-08,
+      "seed": 20261010,
+      "state_order": "lexicographic"
+    },
+    "limitations": [
+      "Gaussian-copula dependence is a model estimate, not an objectively correct probability."
+    ],
+    "matrix_adjustment": null,
+    "missing_data_treatment": "complete rows in the deterministic public fixture",
+    "observation_count": 504,
+    "original_matrix": [[1.0, 0.35], [0.35, 1.0]],
+    "outcome_transformations": [
+      "leg-a: named event mapped to settlement success",
+      "leg-b: named event mapped to settlement success"
+    ],
+    "status": "coherent",
+    "used_matrix": [[1.0, 0.35], [0.35, 1.0]]
+  },
+  "disclosures": [
+    "Parity estimates fair value; it does not establish objectively correct probabilities.",
+    "The quote difference is not guaranteed profit or guaranteed market-maker profit.",
+    "Fee-adjusted net expected value is unavailable until the applicable fee is verified."
+  ],
+  "fallback_used": true,
+  "model_version": "gaussian-copula-v0.1.0",
+  "observation_time": "2026-10-10T12:00:00Z",
+  "provenance": [
+    {
+      "classification": "simulated",
+      "content_sha256": "32a007fd9d7b557260ca9dacf05334936101aa0b82f2b4b5a3479261adde3bbe",
+      "effective_at": null,
+      "fixture_version": "canonical-v1",
+      "limitations": ["Fixture values are simulated and are not current market observations."],
+      "observed_at": "2026-10-10T12:00:00Z",
+      "retrieved_at": null,
+      "source_id": "canonical-v1",
+      "source_kind": "deterministic_fixture",
+      "source_name": "Canonical deterministic fixture",
+      "source_url": null
+    }
+  ],
+  "validation_summary": null,
+  "waterfall": {
+    "correlation_adjustment": {
+      "available": true,
+      "classification": "adjusted",
+      "precision": { "decimal_places": 6, "rounding_mode": "half_even" },
+      "unit": "usd_per_contract",
+      "value": "0.055033"
+    },
+    "fees": {
+      "assumptions": [],
+      "balance_rounding_fee": null,
+      "fee_role": null,
+      "formula_version": null,
+      "model_trade_fee": null,
+      "multiplier": null,
+      "policy_source": null,
+      "rebate": null,
+      "status": "unavailable",
+      "total_fee": {
+        "available": false,
+        "classification": "unavailable",
+        "reason_code": "FEE_POLICY_NOT_VERIFIED",
+        "unit": "usd_total"
+      },
+      "unavailable_reason": "No current fee rule and RFQ-role scope have been verified for this fixture."
+    },
+    "independence_baseline": {
+      "available": true,
+      "classification": "model_estimated",
+      "precision": { "decimal_places": 6, "rounding_mode": "half_even" },
+      "unit": "usd_per_contract",
+      "value": "0.300000"
+    },
+    "model_fair_value": {
+      "available": true,
+      "classification": "model_estimated",
+      "precision": { "decimal_places": 6, "rounding_mode": "half_even" },
+      "unit": "usd_per_contract",
+      "value": "0.355033"
+    },
+    "net_expected_value": {
+      "available": false,
+      "classification": "unavailable",
+      "reason_code": "FEE_POLICY_NOT_VERIFIED",
+      "unit": "usd_total"
+    },
+    "quote_difference": {
+      "available": true,
+      "classification": "model_estimated",
+      "precision": { "decimal_places": 6, "rounding_mode": "half_even" },
+      "unit": "usd_per_contract",
+      "value": "-0.044967"
+    }
+  }
+}

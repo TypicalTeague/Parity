@@ -1,0 +1,433 @@
+openapi: 3.1.0
+info:
+  title: Parity Price Waterfall API
+  version: 0.1.0-design
+  description: >-
+    Stateless decision-support API. Outputs are model estimates, not objectively correct probabilities,
+    executable quotes, trading recommendations, or guaranteed returns.
+servers:
+  - url: /api/v1
+paths:
+  /analyses:
+    post:
+      operationId: analyzeCombo
+      summary: Produce one stateless RFQ combo price waterfall
+      description: Request and response bodies must not be logged, cached, or persisted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisRequest'
+      responses:
+        '200':
+          description: Complete or explicitly partially unavailable analysis
+          headers:
+            Cache-Control:
+              schema: { type: string, const: 'no-store, private, max-age=0, must-revalidate' }
+            Pragma:
+              schema: { type: string, const: no-cache }
+            Expires:
+              schema: { type: string, const: '0' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+        '400':
+          $ref: '#/components/responses/DomainError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/DependencyError'
+  /health:
+    get:
+      operationId: getHealth
+      summary: Return service health without inspecting or accepting user data
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status: { type: string, const: ok }
+components:
+  responses:
+    DomainError:
+      description: Valid request whose combo, dependence, or fee semantics are unsupported
+      headers:
+        Cache-Control:
+          schema: { type: string, const: 'no-store, private, max-age=0, must-revalidate' }
+        Pragma:
+          schema: { type: string, const: no-cache }
+        Expires:
+          schema: { type: string, const: '0' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ValidationError:
+      description: Sanitized shape, range, unit, or timestamp validation failure
+      headers:
+        Cache-Control:
+          schema: { type: string, const: 'no-store, private, max-age=0, must-revalidate' }
+        Pragma:
+          schema: { type: string, const: no-cache }
+        Expires:
+          schema: { type: string, const: '0' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    DependencyError:
+      description: Live public dependency unavailable; demo is offered but not substituted
+      headers:
+        Cache-Control:
+          schema: { type: string, const: 'no-store, private, max-age=0, must-revalidate' }
+        Pragma:
+          schema: { type: string, const: no-cache }
+        Expires:
+          schema: { type: string, const: '0' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    Classification:
+      type: string
+      enum: [observed, model_estimated, simulated, user_provided, adjusted, unavailable]
+    Unit:
+      type: string
+      enum: [probability, usd_per_contract, usd_total]
+    DecimalString:
+      type: string
+      pattern: '^-?(0|[1-9][0-9]*)(\.[0-9]+)?$'
+      description: Canonical base-10 representation; never binary floating-point money.
+    Source:
+      type: object
+      additionalProperties: false
+      required: [source_id, source_name, source_kind, classification]
+      properties:
+        source_id: { type: string, minLength: 1, maxLength: 80 }
+        source_name: { type: string, minLength: 1, maxLength: 160 }
+        source_kind:
+          type: string
+          enum: [user_input, public_api, official_document, deterministic_fixture, model]
+        source_url: { type: [string, 'null'], format: uri }
+        observed_at: { type: [string, 'null'], format: date-time }
+        retrieved_at: { type: [string, 'null'], format: date-time }
+        effective_at: { type: [string, 'null'], format: date-time }
+        classification: { $ref: '#/components/schemas/Classification' }
+        fixture_version: { type: [string, 'null'] }
+        content_sha256: { type: [string, 'null'], pattern: '^[a-f0-9]{64}$' }
+        limitations:
+          type: array
+          items: { type: string }
+    ProbabilityInput:
+      type: object
+      additionalProperties: false
+      required: [value, classification, observed_at, source]
+      properties:
+        value: { type: number, minimum: 0, maximum: 1 }
+        classification:
+          type: string
+          enum: [observed, model_estimated, simulated, user_provided]
+        observed_at: { type: string, format: date-time }
+        source: { $ref: '#/components/schemas/Source' }
+    Condition:
+      oneOf:
+        - $ref: '#/components/schemas/ThresholdCondition'
+        - $ref: '#/components/schemas/EventCondition'
+      discriminator:
+        propertyName: kind
+    ThresholdCondition:
+      type: object
+      additionalProperties: false
+      required: [kind, operator, threshold, unit]
+      properties:
+        kind: { type: string, const: threshold }
+        operator: { type: string, enum: [above, at_or_above, below, at_or_below] }
+        threshold: { $ref: '#/components/schemas/DecimalString' }
+        unit: { type: string, minLength: 1, maxLength: 40 }
+    EventCondition:
+      type: object
+      additionalProperties: false
+      required: [kind, outcome_code]
+      properties:
+        kind: { type: string, const: named_event }
+        outcome_code: { type: string, minLength: 1, maxLength: 80 }
+    ContractLeg:
+      type: object
+      additionalProperties: false
+      required: [leg_id, market_ticker, underlying_outcome, position, condition, settlement_rule,
+        payoff_contribution, probability]
+      properties:
+        leg_id: { type: string, pattern: '^[A-Za-z0-9_-]{1,32}$' }
+        market_ticker: { type: string, minLength: 1, maxLength: 80 }
+        underlying_outcome: { type: string, minLength: 1, maxLength: 160 }
+        position: { type: string, enum: [yes, no] }
+        condition: { $ref: '#/components/schemas/Condition' }
+        settlement_rule: { type: string, minLength: 1, maxLength: 120 }
+        payoff_contribution: { $ref: '#/components/schemas/DecimalString' }
+        probability: { $ref: '#/components/schemas/ProbabilityInput' }
+    StatePayoff:
+      type: object
+      additionalProperties: false
+      required: [state, payoff]
+      properties:
+        state:
+          type: array
+          minItems: 2
+          maxItems: 4
+          items: { type: integer, enum: [0, 1] }
+        payoff: { $ref: '#/components/schemas/DecimalString' }
+    ComboDefinition:
+      type: object
+      additionalProperties: false
+      required: [legs, payoff_rule, currency, payout_unit]
+      properties:
+        combo_id: { type: [string, 'null'], maxLength: 80 }
+        legs:
+          type: array
+          minItems: 2
+          maxItems: 4
+          items: { $ref: '#/components/schemas/ContractLeg' }
+        payoff_rule:
+          type: string
+          enum: [all_legs_win, any_leg_wins, exactly_one_wins, state_table]
+        state_payoffs:
+          type: [array, 'null']
+          items: { $ref: '#/components/schemas/StatePayoff' }
+        currency: { type: string, const: USD }
+        payout_unit: { type: string, const: usd_per_contract }
+    Quote:
+      type: object
+      additionalProperties: false
+      required: [intended_side, participant_role, price_per_contract, quantity, observed_at, source]
+      properties:
+        intended_side: { type: string, enum: [buy, sell] }
+        participant_role: { type: string, enum: [requester, quoter, unknown] }
+        price_per_contract: { $ref: '#/components/schemas/DecimalString' }
+        quantity: { type: integer, minimum: 1, maximum: 1000000 }
+        observed_at: { type: string, format: date-time }
+        source: { $ref: '#/components/schemas/Source' }
+    MarketInputMode:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode: { type: string, const: live }
+        - type: object
+          additionalProperties: false
+          required: [mode, fixture_version]
+          properties:
+            mode: { type: string, const: deterministic_demo }
+            fixture_version: { type: string, pattern: '^[A-Za-z0-9._-]+$' }
+      discriminator:
+        propertyName: mode
+    AnalysisRequest:
+      type: object
+      additionalProperties: false
+      required: [combo, quote, market_inputs]
+      properties:
+        combo: { $ref: '#/components/schemas/ComboDefinition' }
+        quote: { $ref: '#/components/schemas/Quote' }
+        market_inputs: { $ref: '#/components/schemas/MarketInputMode' }
+    AvailableValue:
+      type: object
+      additionalProperties: false
+      required: [available, value, unit, classification, precision]
+      properties:
+        available: { type: boolean, const: true }
+        value:
+          oneOf:
+            - { type: number }
+            - { $ref: '#/components/schemas/DecimalString' }
+        unit: { $ref: '#/components/schemas/Unit' }
+        classification: { $ref: '#/components/schemas/Classification' }
+        precision:
+          type: object
+          additionalProperties: false
+          required: [decimal_places, rounding_mode]
+          properties:
+            decimal_places: { type: integer, minimum: 0, maximum: 12 }
+            rounding_mode: { type: string, enum: [half_even, ceiling, exchange_rule] }
+    UnavailableValue:
+      type: object
+      additionalProperties: false
+      required: [available, unit, classification, reason_code]
+      properties:
+        available: { type: boolean, const: false }
+        unit: { $ref: '#/components/schemas/Unit' }
+        classification: { type: string, const: unavailable }
+        reason_code: { type: string, minLength: 1, maxLength: 80 }
+    ClassifiedValue:
+      oneOf:
+        - $ref: '#/components/schemas/AvailableValue'
+        - $ref: '#/components/schemas/UnavailableValue'
+      discriminator:
+        propertyName: available
+    CorrelationAdjustment:
+      type: object
+      additionalProperties: false
+      required: [status, original_matrix, used_matrix, historical_window, observation_count,
+        missing_data_treatment, outcome_transformations, integration, limitations]
+      properties:
+        status: { type: string, enum: [coherent, adjusted, unavailable] }
+        original_matrix:
+          type: [array, 'null']
+          items: { type: array, items: { type: number, minimum: -1, maximum: 1 } }
+        used_matrix:
+          type: [array, 'null']
+          items: { type: array, items: { type: number, minimum: -1, maximum: 1 } }
+        historical_window:
+          type: object
+          additionalProperties: false
+          required: [start, end]
+          properties:
+            start: { type: string, format: date-time }
+            end: { type: string, format: date-time }
+        observation_count: { type: integer, minimum: 0 }
+        missing_data_treatment: { type: string }
+        outcome_transformations:
+          type: array
+          items: { type: string }
+        matrix_adjustment:
+          type: [object, 'null']
+          additionalProperties: false
+          properties:
+            method: { type: string, const: higham_dykstra }
+            iterations: { type: integer, minimum: 1 }
+            converged: { type: boolean }
+            original_min_eigenvalue: { type: number }
+            repaired_min_eigenvalue: { type: number }
+            frobenius_norm: { type: number, minimum: 0 }
+            max_entry_change: { type: number, minimum: 0 }
+            acceptance_threshold: { type: number, minimum: 0 }
+        integration:
+          type: object
+          additionalProperties: false
+          required: [method, seed, state_order, maxpts, abseps, releps]
+          properties:
+            method: { type: string, const: scipy_mvn_rectangle }
+            seed: { type: integer }
+            state_order: { type: string, const: lexicographic }
+            maxpts: { type: integer, minimum: 1 }
+            abseps: { type: number, exclusiveMinimum: 0 }
+            releps: { type: number, exclusiveMinimum: 0 }
+            probability_sum_residual: { type: number }
+            maximum_correction: { type: number, minimum: 0 }
+        limitations:
+          type: array
+          items: { type: string }
+    FeeAssessment:
+      type: object
+      additionalProperties: false
+      required: [status, total_fee, assumptions]
+      properties:
+        status: { type: string, enum: [verified, estimated, unavailable] }
+        fee_role: { type: [string, 'null'], enum: [maker, taker, null] }
+        policy_source: { oneOf: [{ $ref: '#/components/schemas/Source' }, { type: 'null' }] }
+        formula_version: { type: [string, 'null'] }
+        multiplier: { oneOf: [{ $ref: '#/components/schemas/DecimalString' }, { type: 'null' }] }
+        model_trade_fee: { oneOf: [{ $ref: '#/components/schemas/ClassifiedValue' }, { type: 'null' }] }
+        balance_rounding_fee: { oneOf: [{ $ref: '#/components/schemas/ClassifiedValue' }, { type: 'null' }] }
+        rebate: { oneOf: [{ $ref: '#/components/schemas/ClassifiedValue' }, { type: 'null' }] }
+        total_fee: { $ref: '#/components/schemas/ClassifiedValue' }
+        assumptions:
+          type: array
+          items: { type: string }
+        unavailable_reason: { type: [string, 'null'] }
+    Waterfall:
+      type: object
+      additionalProperties: false
+      required: [independence_baseline, correlation_adjustment, model_fair_value,
+        quote_difference, fees, net_expected_value]
+      properties:
+        independence_baseline: { $ref: '#/components/schemas/ClassifiedValue' }
+        correlation_adjustment: { $ref: '#/components/schemas/ClassifiedValue' }
+        model_fair_value: { $ref: '#/components/schemas/ClassifiedValue' }
+        quote_difference: { $ref: '#/components/schemas/ClassifiedValue' }
+        fees: { $ref: '#/components/schemas/FeeAssessment' }
+        net_expected_value: { $ref: '#/components/schemas/ClassifiedValue' }
+    ValidationSummary:
+      type: object
+      additionalProperties: false
+      required: [status, fitting_window, evaluation_window, eligible_count, excluded_count,
+        prediction_count, metrics, limitations, no_guarantee_disclosure]
+      properties:
+        status: { type: string, enum: [available, insufficient_evidence] }
+        fitting_window: { type: string }
+        evaluation_window: { type: string }
+        eligible_count: { type: integer, minimum: 0 }
+        excluded_count: { type: integer, minimum: 0 }
+        prediction_count: { type: integer, minimum: 0 }
+        metrics:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+        limitations:
+          type: array
+          items: { type: string }
+        no_guarantee_disclosure: { type: string, minLength: 1 }
+    AnalysisResponse:
+      type: object
+      additionalProperties: false
+      required: [waterfall, correlation, provenance, observation_time, model_version,
+        configuration_version, fallback_used, disclosures]
+      properties:
+        waterfall: { $ref: '#/components/schemas/Waterfall' }
+        correlation: { $ref: '#/components/schemas/CorrelationAdjustment' }
+        validation_summary:
+          oneOf:
+            - $ref: '#/components/schemas/ValidationSummary'
+            - { type: 'null' }
+        provenance:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/Source' }
+        observation_time: { type: string, format: date-time }
+        model_version: { type: string, minLength: 1 }
+        configuration_version: { type: string, minLength: 1 }
+        fallback_used: { type: boolean }
+        disclosures:
+          type: array
+          minItems: 1
+          items: { type: string }
+    ErrorField:
+      type: object
+      additionalProperties: false
+      required: [path, code, message]
+      properties:
+        path:
+          type: array
+          items: { type: string }
+          description: Schema field names/indices only; never submitted values.
+        code: { type: string, minLength: 1, maxLength: 80 }
+        message: { type: string, minLength: 1, maxLength: 240 }
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, fields]
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_FAILED, UNSUPPORTED_COMBO, DEPENDENCE_UNUSABLE,
+                LIVE_DATA_UNAVAILABLE, INTERNAL_ERROR]
+            message: { type: string, minLength: 1, maxLength: 240 }
+            fields:
+              type: array
+              items: { $ref: '#/components/schemas/ErrorField' }
+            fallback:
+              type: [object, 'null']
+              additionalProperties: false
+              properties:
+                scenario_id: { type: string, const: canonical-v1 }
+                requires_explicit_request: { type: boolean, const: true }
