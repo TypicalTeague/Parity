@@ -15,8 +15,10 @@ The backend MUST own pricing, statistical, fee, and validation logic behind a do
 An API contract MUST be defined before dependent frontend work begins and MUST specify request and
 response schemas, units, nullability, error shapes, and data provenance. The Next.js frontend MUST
 consume this contract and MUST NOT reimplement quantitative calculations. Breaking contract changes
-require explicit coordination between both developers. Rationale: a stable contract lets frontend
-and backend development proceed in parallel during the hackathon.
+require explicit coordination between both developers. Core analyses MUST operate through stateless
+requests and MUST NOT require a user identity, account, persistent session, or server-side
+calculation history. Rationale: a stable, stateless contract lets frontend and backend development
+proceed in parallel without collecting user data.
 
 ### III. Statistical Integrity and Reproducibility
 The four-part price waterfall MUST keep the independence baseline, correlation adjustment, RFQ
@@ -71,6 +73,20 @@ external dependency MUST have a clearly labeled deterministic fallback. Any prop
 either improve the core waterfall demo, its correctness, or its explainability; otherwise it is
 deferred. Rationale: reliable completion is more valuable than breadth in a 36-hour hackathon.
 
+### IX. Zero-Data Privacy by Design
+Parity MUST provide its core analysis without accounts, personal identifiers, behavioral tracking,
+user profiles, or persistent user-associated histories. Application-controlled copies of
+user-submitted contract, quote, and calculation inputs MUST exist only as long as necessary to return
+the response. Application logs, monitoring, and error reports MUST exclude request bodies, financial
+inputs, personal identifiers, and full URLs containing user input. The core request path MUST NOT
+transmit personally identifiable information or complete user analysis payloads to external AI,
+analytics, advertising, or error-reporting services. Public market information MAY be cached only
+when the cache is independent of user identity and behavior. Where hosting or network providers may
+retain identifiers such as IP addresses, Parity MUST disclose that dependency and MUST NOT claim
+unconditional zero-data collection. Rationale: useful financial decision support does not require a
+surveillance or identity layer, while honest disclosure prevents overstating infrastructure-level
+privacy guarantees.
+
 ## Product and Technical Constraints
 
 - The supported stack is Python 3.12+, FastAPI, Pydantic, Pandas, NumPy, SciPy, pytest, Next.js,
@@ -90,6 +106,10 @@ deferred. Rationale: reliable completion is more valuable than breadth in a 36-h
   Simulated or estimated values MUST be visibly labeled in both API responses and the UI.
 - Secrets, API credentials, and user-identifying data MUST never be committed. Only the minimum public
   market data needed for the demo may be stored locally.
+- Public market-data caches MUST be keyed by market and observation metadata, not by user, device,
+  session, or analysis history, and MUST contain no user-submitted quotes or calculations.
+- Deployment, logging, monitoring, and third-party service settings MUST be reviewed before the demo.
+  Provider-controlled retention that cannot be disabled MUST be documented accurately.
 
 ## Development Workflow and Quality Gates
 
@@ -126,4 +146,4 @@ Each Spec Kit phase review and each pull request review MUST include a constitut
 Deviations MUST be explicit, narrowly bounded, and approved by both developers; no deviation may
 misrepresent model certainty, financial outcomes, fee accuracy, data provenance, or demo inputs.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10
+**Version**: 1.1.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10
