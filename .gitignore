@@ -1,0 +1,45 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+data/private/
+
+# Agent-local sensitive state (keep shared skills under .agents/ tracked)
+.agents/**/.env
+.agents/**/.env.*
+.agents/**/credentials.*
+.agents/**/secrets.*
+.agents/**/local-config.*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Node.js and Next.js
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Local databases, logs, and editor/OS files
+*.db
+*.sqlite
+*.sqlite3
+*.log
+.DS_Store
+.idea/
+.vscode/
